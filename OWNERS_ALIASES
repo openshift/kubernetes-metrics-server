@@ -2,7 +2,5 @@
 aliases:
   metrics-server-approvers:
   - directxman12
-  - piosz
   - brancz
-  - kawych
   metrics-server-reviewers: []
