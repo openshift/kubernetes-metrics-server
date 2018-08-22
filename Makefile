@@ -37,7 +37,7 @@ JUNIT_REPORT ?= true
 #   make
 #   make all
 #   make all WHAT=cmd/oc GOFLAGS=-v
-all build:
+all build: pkg/generated/openapi/zz_generated.openapi.go
 	hack/build-go.sh $(WHAT) $(GOFLAGS)
 .PHONY: all build
 
@@ -99,7 +99,7 @@ clean:
 #
 # Example:
 #   make build-cross
-build-cross:
+build-cross: pkg/generated/openapi/zz_generated.openapi.go
 	hack/build-cross.sh
 .PHONY: build-cross
 
@@ -109,7 +109,7 @@ build-cross:
 #
 # Example:
 #   make build-rpms
-build-rpms:
+build-rpms: pkg/generated/openapi/zz_generated.openapi.go
 	OS_ONLY_BUILD_PLATFORMS='linux/amd64' hack/build-rpms.sh
 .PHONY: build-rpms
 
@@ -122,3 +122,6 @@ build-rpms:
 build-images: build-rpms
 	hack/build-images.sh
 .PHONY: build-images
+
+pkg/generated/openapi/zz_generated.openapi.go:
+	hack/build-openapi.sh
