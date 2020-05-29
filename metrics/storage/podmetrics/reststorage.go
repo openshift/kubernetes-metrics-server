@@ -87,6 +87,11 @@ func (m *MetricStorage) List(ctx genericapirequest.Context, options *metainterna
 
 	res := metrics.PodMetricsList{}
 	for _, pod := range pods {
+		if pod.Status.Phase != v1.PodRunning {
+			// ignore pod not in Running phase
+			continue
+		}
+
 		if podMetrics := m.getPodMetrics(pod); podMetrics != nil {
 			res.Items = append(res.Items, *podMetrics)
 		} else {
