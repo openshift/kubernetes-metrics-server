@@ -18,9 +18,7 @@ Kubelet client flags:
       --kubelet-insecure-tls                      Do not verify CA of serving certificates presented by Kubelets.  For testing purposes only.
       --kubelet-port int                          The port to use to connect to Kubelets. (default 10250)
       --kubelet-preferred-address-types strings   The priority of node address types to use when determining which address to use to connect to a particular node (default [Hostname,InternalDNS,InternalIP,ExternalDNS,ExternalIP])
-      --kubelet-request-timeout duration          The length of time to wait before giving up on a single request to Kubelet. Non-zero values should contain a corresponding time unit (e.g. 1s, 2m, 3h). (default 10s)
       --kubelet-use-node-status-port              Use the port in the node status. Takes precedence over --kubelet-port flag.
-  -l, --node-selector string                      Selector (label query) to filter on, not including uninitialized ones, supports '=', '==', and '!='.(e.g. -l key1=value1,key2=value2).
 
 Apiserver secure serving flags:
 
@@ -94,15 +92,22 @@ Apiserver audit log flags:
 
 Features flags:
 
-      --contention-profiling       Enable block profiling, if profiling is enabled
-      --debug-socket-path string   Use an unprotected (no authn/authz) unix-domain socket for profiling with the given path
-      --profiling                  Enable profiling via web interface host:port/debug/pprof/ (default true)
+      --contention-profiling   Enable lock contention profiling, if profiling is enabled
+      --profiling              Enable profiling via web interface host:port/debug/pprof/ (default true)
 
 Logging flags:
 
-      --log-flush-frequency duration         Maximum number of seconds between log flushes (default 5s)
-      --log-json-info-buffer-size quantity   [Alpha] In JSON format with split output streams, the info messages can be buffered for a while to increase performance. The default value of zero bytes disables buffering. The size can be specified as number of bytes (512), multiples of 1000 (1K), multiples of 1024 (2Ki), or powers of those (3M, 4G, 5Mi, 6Gi). Enable the LoggingAlphaOptions feature gate to use this.
-      --log-json-split-stream                [Alpha] In JSON format, write error messages to stderr and info messages to stdout. The default is to write a single stream to stdout. Enable the LoggingAlphaOptions feature gate to use this.
-      --logging-format string                Sets the log format. Permitted formats: "json" (gated by LoggingBetaOptions), "text". (default "text")
-  -v, --v Level                              number for the log level verbosity
-      --vmodule pattern=N,...                comma-separated list of pattern=N settings for file-filtered logging (only works for text log format)
+      --add_dir_header                   If true, adds the file directory to the header of the log messages (DEPRECATED: will be removed in a future release, see https://github.com/kubernetes/enhancements/tree/master/keps/sig-instrumentation/2845-deprecate-klog-specific-flags-in-k8s-components)
+      --alsologtostderr                  log to standard error as well as files (DEPRECATED: will be removed in a future release, see https://github.com/kubernetes/enhancements/tree/master/keps/sig-instrumentation/2845-deprecate-klog-specific-flags-in-k8s-components)
+      --log-flush-frequency duration     Maximum number of seconds between log flushes (default 5s)
+      --log_backtrace_at traceLocation   when logging hits line file:N, emit a stack trace (DEPRECATED: will be removed in a future release, see https://github.com/kubernetes/enhancements/tree/master/keps/sig-instrumentation/2845-deprecate-klog-specific-flags-in-k8s-components) (default :0)
+      --log_dir string                   If non-empty, write log files in this directory (DEPRECATED: will be removed in a future release, see https://github.com/kubernetes/enhancements/tree/master/keps/sig-instrumentation/2845-deprecate-klog-specific-flags-in-k8s-components)
+      --log_file string                  If non-empty, use this log file (DEPRECATED: will be removed in a future release, see https://github.com/kubernetes/enhancements/tree/master/keps/sig-instrumentation/2845-deprecate-klog-specific-flags-in-k8s-components)
+      --log_file_max_size uint           Defines the maximum size a log file can grow to. Unit is megabytes. If the value is 0, the maximum file size is unlimited. (DEPRECATED: will be removed in a future release, see https://github.com/kubernetes/enhancements/tree/master/keps/sig-instrumentation/2845-deprecate-klog-specific-flags-in-k8s-components) (default 1800)
+      --logtostderr                      log to standard error instead of files (DEPRECATED: will be removed in a future release, see https://github.com/kubernetes/enhancements/tree/master/keps/sig-instrumentation/2845-deprecate-klog-specific-flags-in-k8s-components) (default true)
+      --one_output                       If true, only write logs to their native severity level (vs also writing to each lower severity level) (DEPRECATED: will be removed in a future release, see https://github.com/kubernetes/enhancements/tree/master/keps/sig-instrumentation/2845-deprecate-klog-specific-flags-in-k8s-components)
+      --skip_headers                     If true, avoid header prefixes in the log messages (DEPRECATED: will be removed in a future release, see https://github.com/kubernetes/enhancements/tree/master/keps/sig-instrumentation/2845-deprecate-klog-specific-flags-in-k8s-components)
+      --skip_log_headers                 If true, avoid headers when opening log files (DEPRECATED: will be removed in a future release, see https://github.com/kubernetes/enhancements/tree/master/keps/sig-instrumentation/2845-deprecate-klog-specific-flags-in-k8s-components)
+      --stderrthreshold severity         logs at or above this threshold go to stderr (DEPRECATED: will be removed in a future release, see https://github.com/kubernetes/enhancements/tree/master/keps/sig-instrumentation/2845-deprecate-klog-specific-flags-in-k8s-components) (default 2)
+  -v, --v Level                          number for the log level verbosity
+      --vmodule moduleSpec               comma-separated list of pattern=N settings for file-filtered logging
