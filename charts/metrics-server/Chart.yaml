@@ -26,6 +26,8 @@ annotations:
     - kind: fixed
       description: "Fixed addon resizer configuration."
     - kind: added
-      description: "Added support for running under PodSecurity restricted."
-    - kind: fixed
-      description: "Fixed container port default not having been updated to 10250."
+      description: "Add support for unauthenticated access to /metrics endpoint."
+    - kind: added
+      description: "Add PrometheusOperator ServiceMonitor."
+    - kind: changed
+      description: "Update Metrics Server image to v0.6.0."
