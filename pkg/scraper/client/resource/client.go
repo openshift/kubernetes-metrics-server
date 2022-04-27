@@ -121,6 +121,7 @@ func (kc *kubeletClient) getMetrics(ctx context.Context, url, nodeName string) (
 	}
 	b = buf.Bytes()
 	ms, err := decodeBatch(b, requestTime, nodeName)
+	kc.buffers.Put(b)
 	if err != nil {
 		return nil, err
 	}
