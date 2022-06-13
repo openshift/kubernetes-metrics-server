@@ -6,10 +6,9 @@ set -e
 : ${SKAFFOLD_PROFILE:="test"}
 
 
-KIND_VERSION=0.17.0
-SKAFFOLD_VERSION=1.39.1
-HELM_VERSION=3.10.2
-KUBECTL_VERSION=1.25.4
+KIND_VERSION=0.14.0
+SKAFFOLD_VERSION=1.38.0
+HELM_VERSION=3.7.1
 
 delete_cluster() {
   ${KIND} delete cluster --name=e2e &> /dev/null || true
