@@ -10,7 +10,7 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: {{ include "metrics-server.addonResizer.role" . }}
+  name: metrics-server-nanny
 subjects:
   - kind: ServiceAccount
     name: {{ include "metrics-server.serviceAccountName" . }}
