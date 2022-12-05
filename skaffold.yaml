@@ -19,17 +19,18 @@ profiles:
     deploy:
       kustomize:
         paths:
-          - manifests/overlays/test
+          - manifests/test
   - name: test-ha
     deploy:
       kustomize:
         paths:
-          - manifests/overlays/test-ha
+          - manifests/test-ha
   - name: helm
     deploy:
       helm:
         releases:
           - name: metrics-server
+            namespace: kube-system
             namespace: kube-system
             artifactOverrides:
               imageKey: gcr.io/k8s-staging-metrics-server/metrics-server
@@ -39,6 +40,6 @@ profiles:
               image.tag: "{{.IMAGE_TAG}}"
             setValues:
               podLabels: { k8s-app: metrics-server }
-              containerPort: 10250
+              containerPort: 4443
             valuesFiles:
               - test/chart-values.yaml
