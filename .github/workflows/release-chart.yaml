@@ -10,14 +10,18 @@ on:
 jobs:
   release:
     name: Release
+    name: Release
     if: github.repository == 'kubernetes-sigs/metrics-server'
     runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash
+    defaults:
+      run:
+        shell: bash
     steps:
       - name: Checkout
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 #v3.5.3
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c #v3.3.0
         with:
           fetch-depth: 0
 
@@ -28,13 +32,13 @@ jobs:
 
       - name: Get chart version
         id: chart_version
-        uses: mikefarah/yq@5ef537f3fd1a9437aa3ee44c32c6459a126efdc4 # v4.34.1
+        uses: mikefarah/yq@87cba2ecbeaecf860efcceb66deab46ae030ce1e # v4.30.6
         with:
           cmd: yq eval '.version' './charts/metrics-server/Chart.yaml'
 
       - name: Get chart app version
         id: chart_app_version
-        uses: mikefarah/yq@5ef537f3fd1a9437aa3ee44c32c6459a126efdc4 # v4.34.1
+        uses: mikefarah/yq@87cba2ecbeaecf860efcceb66deab46ae030ce1e # v4.30.6
         with:
           cmd: yq eval '.appVersion' './charts/metrics-server/Chart.yaml'
 
@@ -54,21 +58,29 @@ jobs:
           if [[ -z "${chart_version_match}" ]] || [[ -z "${app_version_match}" ]]
           then
             echo "continue=${{ toJSON(false) }}" >> $GITHUB_OUTPUT
+            echo "continue=${{ toJSON(false) }}" >> $GITHUB_OUTPUT
           else
+            echo "continue=${{ toJSON(true) }}" >> $GITHUB_OUTPUT
             echo "continue=${{ toJSON(true) }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Set-up Helm
+      - name: Set-up Helm
         if: fromJSON(steps.check_can_release.outputs.continue)
         uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78 # v3.5
+        uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78 # v3.5
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          version: latest
           token: ${{ secrets.GITHUB_TOKEN }}
           version: latest
 
       - name: Run chart-releaser
         if: fromJSON(steps.check_can_release.outputs.continue)
         uses: helm/chart-releaser-action@be16258da8010256c6e82849661221415f031968 # v1.5.0
+        uses: helm/chart-releaser-action@be16258da8010256c6e82849661221415f031968 # v1.5.0
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           CR_RELEASE_NAME_TEMPLATE: "metrics-server-helm-chart-{{ .Version }}"
+          CR_MAKE_RELEASE_LATEST: false
           CR_MAKE_RELEASE_LATEST: false
