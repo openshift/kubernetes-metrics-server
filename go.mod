@@ -7,10 +7,10 @@ require (
 	github.com/google/go-cmp v0.5.9
 	github.com/google/go-cmp v0.5.9
 	github.com/onsi/ginkgo v1.14.0
-	github.com/onsi/gomega v1.27.4
-	github.com/prometheus/common v0.37.0
-	github.com/prometheus/prometheus v0.0.0-20220129212040-344a13d96087
-	github.com/spf13/cobra v1.6.0
+	github.com/onsi/gomega v1.10.1
+	github.com/prometheus/common v0.31.0
+	github.com/prometheus/prometheus v2.5.0+incompatible
+	github.com/spf13/cobra v1.6.1
 	github.com/spf13/pflag v1.0.5
 	golang.org/x/perf v0.0.0-20210220033136-40a54f11e909
 	k8s.io/api v0.23.16
@@ -18,7 +18,7 @@ require (
 	k8s.io/apiserver v0.23.16
 	k8s.io/client-go v0.23.16
 	k8s.io/component-base v0.23.16
-	k8s.io/klog/v2 v2.60.1
+	k8s.io/klog/v2 v2.30.0
 	k8s.io/kube-openapi v0.0.0-20211115234752-e816edb12b65
 	k8s.io/metrics v0.23.16
 	sigs.k8s.io/logtools v0.4.1
@@ -60,8 +60,8 @@ require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/googleapis/gnostic v0.5.5 // indirect
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.0 // indirect
-	github.com/imdario/mergo v0.3.12 // indirect
+	github.com/grpc-ecosystem/grpc-gateway v1.16.0 // indirect
+	github.com/imdario/mergo v0.3.5 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
@@ -79,6 +79,7 @@ require (
 	github.com/prometheus/client_golang v1.11.1 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/procfs v0.6.0 // indirect
+	github.com/spf13/afero v1.9.4 // indirect
 	github.com/stretchr/testify v1.8.2 // indirect
 	go.etcd.io/etcd/api/v3 v3.5.7 // indirect
 	go.etcd.io/etcd/client/pkg/v3 v3.5.7 // indirect
