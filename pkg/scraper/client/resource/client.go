@@ -28,6 +28,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/rest"
+	"github.com/google/uuid"
 
 	"sigs.k8s.io/metrics-server/pkg/scraper/client"
 	"sigs.k8s.io/metrics-server/pkg/storage"
@@ -99,7 +100,8 @@ func (kc *kubeletClient) GetMetrics(ctx context.Context, node *corev1.Node) (*st
 		Host:   net.JoinHostPort(addr, strconv.Itoa(port)),
 		Path:   path,
 	}
-	return kc.getMetrics(ctx, url.String(), node.Name)
+	a, err := kc.getMetrics(ctx, url.String(), node.Name)
+	return a, err
 }
 
 func (kc *kubeletClient) getMetrics(ctx context.Context, url, nodeName string) (*storage.MetricsBatch, error) {
@@ -107,8 +109,14 @@ func (kc *kubeletClient) getMetrics(ctx context.Context, url, nodeName string) (
 	if err != nil {
 		return nil, err
 	}
+	// TODO: it'd be great in metrics-server supports this, maybe it already does.
+	// maybe use ctx for that.
+	uu := uuid.New().String()
+	fmt.Println(time.Now(), "DEBBUG getMetrics sending request UUID", uu)
+	req.Header.Add("DEBUG-UUID", uu)
 	requestTime := time.Now()
 	response, err := kc.client.Do(req.WithContext(ctx))
+	fmt.Println(time.Now(), "DEBBUG getMetrics got response for UUID", uu)
 	if err != nil {
 		return nil, err
 	}
