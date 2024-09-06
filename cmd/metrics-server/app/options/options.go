@@ -158,6 +158,19 @@ func (o Options) ApiserverConfig() (*genericapiserver.Config, error) {
 	serverConfig.OpenAPIConfig.Info.Version = strings.Split(serverConfig.Version.String(), "-")[0] // TODO(directxman12): remove this once autosetting this doesn't require security definitions
 	serverConfig.OpenAPIV3Config.Info.Version = strings.Split(serverConfig.Version.String(), "-")[0]
 
+	// test for https://issues.redhat.com/browse/OCPBUGS-39133 
+	// Readiness probe fails after 6*20s + 5s (max val)
+/* 	readinessProbe:
+	failureThreshold: 6
+	httpGet:
+	  path: /readyz
+	  port: https
+	  scheme: HTTPS
+	initialDelaySeconds: 20
+	periodSeconds: 20 */
+	serverConfig.ShutdownDelayDuration = 125*time.Second
+	serverConfig.ShutdownSendRetryAfter = true
+
 	return serverConfig, nil
 }
 
