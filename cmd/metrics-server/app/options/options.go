@@ -159,7 +159,7 @@ func (o Options) ApiserverConfig() (*genericapiserver.Config, error) {
 	serverConfig.OpenAPIV3Config.Info.Version = strings.Split(serverConfig.Version.String(), "-")[0]
 
 	// test for https://issues.redhat.com/browse/OCPBUGS-39133 
-	// Readiness probe fails after 6*20s + 5s (max val)
+	// Readiness probe fails after 6*20s + extra 30s (max val)
 /* 	readinessProbe:
 	failureThreshold: 6
 	httpGet:
@@ -168,7 +168,7 @@ func (o Options) ApiserverConfig() (*genericapiserver.Config, error) {
 	  scheme: HTTPS
 	initialDelaySeconds: 20
 	periodSeconds: 20 */
-	serverConfig.ShutdownDelayDuration = 125*time.Second
+	serverConfig.ShutdownDelayDuration = 150*time.Second
 	serverConfig.ShutdownSendRetryAfter = true
 
 	return serverConfig, nil
