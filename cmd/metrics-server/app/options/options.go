@@ -37,13 +37,14 @@ import (
 
 type Options struct {
 	// genericoptions.RecomendedOptions - EtcdOptions
-	SecureServing  *genericoptions.SecureServingOptionsWithLoopback
-	Authentication *genericoptions.DelegatingAuthenticationOptions
-	Authorization  *genericoptions.DelegatingAuthorizationOptions
-	Audit          *genericoptions.AuditOptions
-	Features       *genericoptions.FeatureOptions
-	KubeletClient  *KubeletClientOptions
-	Logging        *logs.Options
+	GenericServerRunOptions *genericoptions.ServerRunOptions
+	SecureServing           *genericoptions.SecureServingOptionsWithLoopback
+	Authentication          *genericoptions.DelegatingAuthenticationOptions
+	Authorization           *genericoptions.DelegatingAuthorizationOptions
+	Audit                   *genericoptions.AuditOptions
+	Features                *genericoptions.FeatureOptions
+	KubeletClient           *KubeletClientOptions
+	Logging                 *logs.Options
 
 	MetricResolution time.Duration
 	ShowVersion      bool
@@ -59,6 +60,9 @@ func (o *Options) Validate() []error {
 	err := logsapi.ValidateAndApply(o.Logging, nil)
 	if err != nil {
 		errors = append(errors, err)
+	}
+	if errs := o.GenericServerRunOptions.Validate(); len(errs) > 0 {
+		errors = append(errors, errs...)
 	}
 	return errors
 }
@@ -80,6 +84,7 @@ func (o *Options) Flags() (fs flag.NamedFlagSets) {
 	msfs.BoolVar(&o.ShowVersion, "version", false, "Show version")
 	msfs.StringVar(&o.Kubeconfig, "kubeconfig", o.Kubeconfig, "The path to the kubeconfig used to connect to the Kubernetes API server and the Kubelets (defaults to in-cluster config)")
 
+	o.GenericServerRunOptions.AddUniversalFlags(fs.FlagSet("generic"))
 	o.KubeletClient.AddFlags(fs.FlagSet("kubelet client"))
 	o.SecureServing.AddFlags(fs.FlagSet("apiserver secure serving"))
 	o.Authentication.AddFlags(fs.FlagSet("apiserver authentication"))
@@ -94,13 +99,14 @@ func (o *Options) Flags() (fs flag.NamedFlagSets) {
 // NewOptions constructs a new set of default options for metrics-server.
 func NewOptions() *Options {
 	return &Options{
-		SecureServing:  genericoptions.NewSecureServingOptions().WithLoopback(),
-		Authentication: genericoptions.NewDelegatingAuthenticationOptions(),
-		Authorization:  genericoptions.NewDelegatingAuthorizationOptions(),
-		Features:       genericoptions.NewFeatureOptions(),
-		Audit:          genericoptions.NewAuditOptions(),
-		KubeletClient:  NewKubeletClientOptions(),
-		Logging:        logs.NewOptions(),
+		GenericServerRunOptions: genericoptions.NewServerRunOptions(),
+		SecureServing:           genericoptions.NewSecureServingOptions().WithLoopback(),
+		Authentication:          genericoptions.NewDelegatingAuthenticationOptions(),
+		Authorization:           genericoptions.NewDelegatingAuthorizationOptions(),
+		Features:                genericoptions.NewFeatureOptions(),
+		Audit:                   genericoptions.NewAuditOptions(),
+		KubeletClient:           NewKubeletClientOptions(),
+		Logging:                 logs.NewOptions(),
 
 		MetricResolution: 60 * time.Second,
 	}
@@ -131,6 +137,11 @@ func (o Options) ApiserverConfig() (*genericapiserver.Config, error) {
 	}
 
 	serverConfig := genericapiserver.NewConfig(api.Codecs)
+
+	if err := o.GenericServerRunOptions.ApplyTo(serverConfig); err != nil {
+		return nil, err
+	}
+
 	if err := o.SecureServing.ApplyTo(&serverConfig.SecureServing, &serverConfig.LoopbackClientConfig); err != nil {
 		return nil, err
 	}
