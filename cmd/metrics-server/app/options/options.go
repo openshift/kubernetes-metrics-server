@@ -146,6 +146,9 @@ func (o Options) ApiserverConfig() (*genericapiserver.Config, error) {
 		return nil, err
 	}
 
+	// Disable HTTP2
+	serverConfig.SecureServing.DisableHTTP2 = true
+
 	if !o.DisableAuthForTesting {
 		if err := o.Authentication.ApplyTo(&serverConfig.Authentication, serverConfig.SecureServing, nil); err != nil {
 			return nil, err
