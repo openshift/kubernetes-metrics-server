@@ -130,6 +130,12 @@ func NewServerRunOptionsForComponent(componentName string, componentGlobalsRegis
 
 // ApplyTo applies the run options to the method receiver and returns self
 func (s *ServerRunOptions) ApplyTo(c *server.Config) error {
+	// This is needed to Apply parsed flags to GlobalRegistry, so the DefaultFeatureGate values can be set from the flag
+	err := s.ComponentGlobalsRegistry.Set()
+	if err != nil {
+		return err
+	}
+
 	if err := s.ComponentGlobalsRegistry.SetFallback(); err != nil {
 		return err
 	}
