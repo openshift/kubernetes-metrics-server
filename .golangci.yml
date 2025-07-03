@@ -1,32 +1,55 @@
+version: "2"
 run:
-  deadline: 2m
-
+  timeout: 10m
 linters:
-  disable-all: true
+  default: standard
   enable:
     - bodyclose
+    - copyloopvar
     - dogsled
     - dupl
     - errcheck
-    - exportloopref
     - exhaustive
     - gocritic
     - gocyclo
-    - gofmt
-    - goimports
     - goprintffuncname
-    - gosimple
     - govet
     - ineffassign
     - misspell
     - nakedret
     - nolintlint
     - staticcheck
-    - typecheck
     - unconvert
     - unused
     - whitespace
-
-linters-settings:
-  goimports:
-    local-prefixes: sigs.k8s.io/metrics-server
+  settings:
+    staticcheck:
+     checks:
+       - all
+       # Disable QF1008 to retain embedded fields for better readability.
+       - "-QF1008"
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - sigs.k8s.io/metrics-server
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

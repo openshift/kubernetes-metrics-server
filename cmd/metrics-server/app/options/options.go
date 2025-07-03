@@ -22,11 +22,12 @@ import (
 	openapinamer "k8s.io/apiserver/pkg/endpoints/openapi"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	genericoptions "k8s.io/apiserver/pkg/server/options"
-	utilversion "k8s.io/apiserver/pkg/util/version"
+	utilcompatibility "k8s.io/apiserver/pkg/util/compatibility"
 	"k8s.io/client-go/pkg/version"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/component-base/cli/flag"
+	"k8s.io/component-base/compatibility"
 	"k8s.io/component-base/logs"
 	logsapi "k8s.io/component-base/logs/api/v1"
 	_ "k8s.io/component-base/logs/json/register"
@@ -100,7 +101,7 @@ func (o *Options) Flags() (fs flag.NamedFlagSets) {
 // NewOptions constructs a new set of default options for metrics-server.
 func NewOptions() *Options {
 	return &Options{
-		GenericServerRunOptions: genericoptions.NewServerRunOptions(),
+		GenericServerRunOptions: genericoptions.NewServerRunOptionsForComponent("metrics server", compatibility.NewComponentGlobalsRegistry()),
 		SecureServing:           genericoptions.NewSecureServingOptions().WithLoopback(),
 		Authentication:          genericoptions.NewDelegatingAuthenticationOptions(),
 		Authorization:           genericoptions.NewDelegatingAuthorizationOptions(),
@@ -137,8 +138,16 @@ func (o Options) ApiserverConfig() (*genericapiserver.Config, error) {
 		return nil, fmt.Errorf("error creating self-signed certificates: %v", err)
 	}
 
-	serverConfig := genericapiserver.NewConfig(api.Codecs)
+	// Calling Set() here silences the componentGlobalsRegistry.SetFallback
+	// warning log mentioned in issue #1658.  In the case of metrics-server, it
+	// doesn't expose feature-gates so the warning is not applicable, but if we
+	// were to add some in the future, the call to Set() is close to where flags
+	// are parsed.
+	if err := o.GenericServerRunOptions.ComponentGlobalsRegistry.Set(); err != nil {
+		return nil, err
+	}
 
+	serverConfig := genericapiserver.NewConfig(api.Codecs)
 	if err := o.GenericServerRunOptions.ApplyTo(serverConfig); err != nil {
 		return nil, err
 	}
@@ -168,7 +177,7 @@ func (o Options) ApiserverConfig() (*genericapiserver.Config, error) {
 	serverConfig.OpenAPIV3Config.Info.Title = "Kubernetes metrics-server"
 	serverConfig.OpenAPIConfig.Info.Version = strings.Split(versionGet.String(), "-")[0] // TODO(directxman12): remove this once autosetting this doesn't require security definitions
 	serverConfig.OpenAPIV3Config.Info.Version = strings.Split(versionGet.String(), "-")[0]
-	serverConfig.EffectiveVersion = utilversion.DefaultKubeEffectiveVersion()
+	serverConfig.EffectiveVersion = utilcompatibility.DefaultBuildEffectiveVersion()
 
 	return serverConfig, nil
 }
