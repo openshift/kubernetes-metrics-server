@@ -5,7 +5,7 @@ COPY . /go/src/sigs.k8s.io/metrics-server
 WORKDIR /go/src/sigs.k8s.io/metrics-server
 RUN make metrics-server-ocp -f Makefile.ocp
 
-FROM registry.ci.openshift.org/ocp/4.22:base-rhel9
+FROM registry.ci.openshift.org/ocp/4.22:base-rhel9-minimal
 
 COPY --from=builder /go/src/sigs.k8s.io/metrics-server/metrics-server /usr/bin/metrics-server
 
