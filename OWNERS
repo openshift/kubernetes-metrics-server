@@ -3,9 +3,7 @@ component: "Monitoring"
 reviewers:
 - simonpasquier
 - jan--f
-- raptorsun
 - slashpai
-- sthaha
 - danielmellado
 - marioferh
 - rexagod
@@ -15,9 +13,7 @@ approvers:
 - bparees
 - simonpasquier
 - jan--f
-- raptorsun
 - slashpai
-- sthaha
 - danielmellado
 - marioferh
 - rexagod
