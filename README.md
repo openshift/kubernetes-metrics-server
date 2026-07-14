@@ -72,6 +72,7 @@ Installation instructions for previous releases can be found in [Metrics Server 
 
 Metrics Server | Metrics API group/version | Supported Kubernetes version
 ---------------|---------------------------|-----------------------------
+0.9.x          | `metrics.k8s.io/v1beta1`  | 1.34+
 0.8.x          | `metrics.k8s.io/v1beta1`  | 1.31+
 0.7.x          | `metrics.k8s.io/v1beta1`  | 1.27+
 0.6.x          | `metrics.k8s.io/v1beta1`  | 1.25+
@@ -153,7 +154,7 @@ Most useful flags:
 You can get a full list of Metrics Server configuration flags by running:
 
 ```shell
-docker run --rm registry.k8s.io/metrics-server/metrics-server:v0.8.1 --help
+docker run --rm registry.k8s.io/metrics-server/metrics-server:v0.9.0 --help
 ```
 
 ## Design
@@ -168,6 +169,33 @@ For more information, see:
 [Kubernetes monitoring architecture]: https://github.com/kubernetes/design-proposals-archive/blob/main/instrumentation/monitoring_architecture.md
 [Metrics API design]: https://github.com/kubernetes/design-proposals-archive/blob/main/instrumentation/resource-metrics-api.md
 [Metrics Server design]: https://github.com/kubernetes/design-proposals-archive/blob/main/instrumentation/metrics-server.md
+
+This diagram shows how metrics-server handles a `kubectl top pods` request:
+```mermaid
+sequenceDiagram
+    participant User
+    participant APIServer
+    participant MS as Metrics-server
+
+
+    User->>APIServer: GET /apis/metrics.k8s.io/v1beta1/pods
+    APIServer->>MS: GET /apis/metrics.k8s.io/v1beta1/pods
+    MS->>MS: use Pod Informer to get a list of pods
+    MS->>MS: lookup each pod's memory and cpu from its in-memory cache
+    MS->>APIServer: metrics.PodMetricsList
+    APIServer->>User: Response 
+```
+
+```mermaid
+sequenceDiagram
+    participant MS as Metrics-server
+    participant KL as Kubelet
+
+    MS->>MS: use Node informer to get a list of nodes and their IPs periodically 
+    MS->>KL: GET /metrics/resource
+    KL->>MS: returns memory and cpu data for each pod
+    MS->>MS: update its in-memory cache to store memory and cpu data for each pod
+```
 
 ## Have a question?
 
