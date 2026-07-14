@@ -31,7 +31,15 @@ ALL_BINARIES_PLATFORMS= $(addprefix linux/,$(ALL_ARCHITECTURES)) \
 
 # Tools versions
 # --------------
-GOLANGCI_VERSION:=2.1.6
+GOLANGCI_VERSION:=2.12.2
+
+# Tools CLI
+# ---------
+ADDLICENSE_CLI ?= go tool github.com/google/addlicense
+BENCHSTAT_CLI ?= go tool golang.org/x/perf/cmd/benchstat
+LOGCHECK_CLI ?= go tool sigs.k8s.io/logtools/logcheck
+MDTOC_CLI ?= go tool sigs.k8s.io/mdtoc
+OPENAPIGEN_CLI ?= go tool k8s.io/kube-openapi/cmd/openapi-gen
 
 # Computed variables
 # ------------------
@@ -73,7 +81,7 @@ CONTAINER_ARCH_TARGETS=$(addprefix container-,$(ALL_ARCHITECTURES))
 container:
 	# Pull base image explicitly. Keep in sync with Dockerfile, otherwise
 	# GCB builds will start failing.
-	${CONTAINER_CLI} pull golang:1.24.12
+	${CONTAINER_CLI} pull golang:1.26.4
 	${CONTAINER_CLI} build -t $(REGISTRY)/metrics-server-$(ARCH):$(CHECKSUM) --build-arg ARCH=$(ARCH) --build-arg GIT_TAG=$(GIT_TAG) --build-arg GIT_COMMIT=$(GIT_COMMIT) .
 
 .PHONY: container-all
@@ -141,7 +149,7 @@ test-unit:
 HAS_BENCH_STORAGE=$(wildcard ./$(OUTPUT_DIR)/bench_storage.txt)
 
 .PHONY: bench-storage
-bench-storage: benchstat
+bench-storage:
 	@mkdir -p $(OUTPUT_DIR)
 ifneq ("$(HAS_BENCH_STORAGE)","")
 	@mv $(OUTPUT_DIR)/bench_storage.txt $(OUTPUT_DIR)/bench_storage.old.txt
@@ -153,14 +161,7 @@ endif
 	@echo
 	@echo 'Comparing versus previous run. When optimizing copy everything below this line and include in PR description.'
 	@echo
-	@benchstat $(OUTPUT_DIR)/bench_storage.old.txt $(OUTPUT_DIR)/bench_storage.txt
-
-HAS_BENCHSTAT:=$(shell command -v benchstat)
-.PHONY: benchstat
-benchstat:
-ifndef HAS_BENCHSTAT
-	@go install -mod=readonly -modfile=scripts/go.mod golang.org/x/perf/cmd/benchstat
-endif
+	${BENCHSTAT_CLI} $(OUTPUT_DIR)/bench_storage.old.txt $(OUTPUT_DIR)/bench_storage.txt
 
 # Image tests
 # ------------
@@ -178,22 +179,22 @@ test-image-all:
 # -----------
 
 .PHONY: test-e2e
-test-e2e: test-e2e-1.33
+test-e2e: test-e2e-1.36
 
 .PHONY: test-e2e-all
-test-e2e-all: test-e2e-1.33 test-e2e-1.32 test-e2e-1.31
+test-e2e-all: test-e2e-1.36 test-e2e-1.35 test-e2e-1.34
 
-.PHONY: test-e2e-1.33
-test-e2e-1.33:
-	NODE_IMAGE=kindest/node:v1.33.1@sha256:050072256b9a903bd914c0b2866828150cb229cea0efe5892e2b644d5dd3b34f KIND_CONFIG="${PWD}/test/kind-config-with-sidecar-containers.yaml" ./test/test-e2e.sh
+.PHONY: test-e2e-1.36
+test-e2e-1.36:
+	NODE_IMAGE=kindest/node:v1.36.1@sha256:3489c7674813ba5d8b1a9977baea8a6e553784dab7b84759d1014dbd78f7ebd5 KIND_CONFIG="${PWD}/test/kind-config-with-sidecar-containers.yaml" ./test/test-e2e.sh
 
-.PHONY: test-e2e-1.32
-test-e2e-1.32:
-	NODE_IMAGE=kindest/node:v1.32.5@sha256:e3b2327e3a5ab8c76f5ece68936e4cafaa82edf58486b769727ab0b3b97a5b0d KIND_CONFIG="${PWD}/test/kind-config-with-sidecar-containers.yaml" ./test/test-e2e.sh
+.PHONY: test-e2e-1.35
+test-e2e-1.35:
+	NODE_IMAGE=kindest/node:v1.35.5@sha256:ce977ae6d65918d0b58a5f8b5e940429c2ce42fa3a5619ec2bbc60b949c0ac95 KIND_CONFIG="${PWD}/test/kind-config-with-sidecar-containers.yaml" ./test/test-e2e.sh
 
-.PHONY: test-e2e-1.31
-test-e2e-1.31:
-	NODE_IMAGE=kindest/node:v1.31.9@sha256:b94a3a6c06198d17f59cca8c6f486236fa05e2fb359cbd75dabbfc348a10b211 KIND_CONFIG="${PWD}/test/kind-config-with-sidecar-containers.yaml" ./test/test-e2e.sh
+.PHONY: test-e2e-1.34
+test-e2e-1.34:
+	NODE_IMAGE=kindest/node:v1.34.8@sha256:02722c2dedddcfc00febf5d27fbeb9b7b2c14294c82109ff4a85d89ac9ba3256 KIND_CONFIG="${PWD}/test/kind-config-with-sidecar-containers.yaml" ./test/test-e2e.sh
 
 .PHONY: test-e2e-ha
 test-e2e-ha:
@@ -215,7 +216,7 @@ test-e2e-helm-all:
 # ---------------
 
 .PHONY: verify
-verify: verify-licenses verify-lint verify-toc verify-deps verify-scripts-deps verify-generated verify-structured-logging
+verify: verify-licenses verify-lint verify-toc verify-deps verify-generated verify-structured-logging
 
 .PHONY: update
 update: update-licenses update-lint update-toc update-deps update-generated
@@ -223,20 +224,13 @@ update: update-licenses update-lint update-toc update-deps update-generated
 # License
 # -------
 
-HAS_ADDLICENSE:=$(shell command -v addlicense)
 .PHONY: verify-licenses
-verify-licenses:addlicense
-	find -type f -name "*.go" ! -path "*/vendor/*" | xargs $(GOPATH)/bin/addlicense -check || (echo 'Run "make update"' && exit 1)
+verify-licenses:
+	find -type f -name "*.go" ! -path "*/vendor/*" | xargs ${ADDLICENSE_CLI} -check || (echo 'Run "make update"' && exit 1)
 
 .PHONY: update-licenses
-update-licenses: addlicense
-	find -type f -name "*.go" ! -path "*/vendor/*" | xargs $(GOPATH)/bin/addlicense -c "The Kubernetes Authors."
-
-.PHONY: addlicense
-addlicense:
-ifndef HAS_ADDLICENSE
-	go install -mod=readonly -modfile=scripts/go.mod github.com/google/addlicense
-endif
+update-licenses:
+	find -type f -name "*.go" ! -path "*/vendor/*" | xargs ${ADDLICENSE_CLI} -c "The Kubernetes Authors."
 
 # Lint
 # ----
@@ -253,7 +247,7 @@ HAS_GOLANGCI_VERSION:=$(shell $(GOPATH)/bin/golangci-lint version --format=short
 .PHONY: golangci
 golangci:
 ifneq ($(HAS_GOLANGCI_VERSION), $(GOLANGCI_VERSION))
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin v$(GOLANGCI_VERSION)
+	curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b $(GOPATH)/bin v$(GOLANGCI_VERSION)
 endif
 
 # Table of Contents
@@ -262,33 +256,19 @@ endif
 docs_with_toc=FAQ.md KNOWN_ISSUES.md
 
 .PHONY: verify-toc
-verify-toc: mdtoc $(docs_with_toc)
-	$(GOPATH)/bin/mdtoc --inplace --dryrun $(docs_with_toc)
+verify-toc: $(docs_with_toc)
+	${MDTOC_CLI} --inplace --dryrun $(docs_with_toc)
 
 .PHONY: update-toc
-update-toc: mdtoc $(docs_with_toc)
-	$(GOPATH)/bin/mdtoc --inplace $(docs_with_toc)
-
-HAS_MDTOC:=$(shell command -v mdtoc)
-.PHONY: mdtoc
-mdtoc:
-ifndef HAS_MDTOC
-	go install -mod=readonly -modfile=scripts/go.mod sigs.k8s.io/mdtoc
-endif
+update-toc: $(docs_with_toc)
+	${MDTOC_CLI} --inplace $(docs_with_toc)
 
 # Structured Logging
 # -----------------
 
 .PHONY: verify-structured-logging
-verify-structured-logging: logcheck
-	$(GOPATH)/bin/logcheck ./... || (echo 'Fix structured logging' && exit 1)
-
-HAS_LOGCHECK:=$(shell command -v logcheck)
-.PHONY: logcheck
-logcheck:
-ifndef HAS_LOGCHECK
-	go install -mod=readonly -modfile=scripts/go.mod sigs.k8s.io/logtools/logcheck
-endif
+verify-structured-logging:
+	${LOGCHECK_CLI} ./... || (echo 'Fix structured logging' && exit 1)
 
 # Dependencies
 # ------------
@@ -296,17 +276,12 @@ endif
 .PHONY: update-deps
 update-deps:
 	go mod tidy
-	cd scripts && go mod tidy
 
 .PHONY: verify-deps
 verify-deps:
 	go mod verify
 	go mod tidy
 	@git diff --exit-code -- go.mod go.sum
-
-.PHONY: verify-scripts-deps
-verify-scripts-deps:
-	make -C scripts -f ../Makefile verify-deps
 
 # Generated
 # ---------
@@ -320,8 +295,13 @@ verify-generated: update-generated
 .PHONY: update-generated
 update-generated:
 	# pkg/api/generated/openapi/zz_generated.openapi.go
-	go install -mod=readonly -modfile=scripts/go.mod k8s.io/kube-openapi/cmd/openapi-gen
-	$(GOPATH)/bin/openapi-gen -i k8s.io/metrics/pkg/apis/metrics/v1beta1,k8s.io/apimachinery/pkg/apis/meta/v1,k8s.io/apimachinery/pkg/api/resource,k8s.io/apimachinery/pkg/version -p pkg/api/generated/openapi/ -O zz_generated.openapi -o $(REPO_DIR) -h $(REPO_DIR)/scripts/boilerplate.go.txt -r /dev/null
+	${OPENAPIGEN_CLI}\
+		--output-pkg github.com/kubernetes-sigs/metrics-server/pkg/api/generated/openapi/\
+		--output-file=zz_generated.openapi.go\
+		--output-dir=$(REPO_DIR)/pkg/api/generated/openapi\
+		--go-header-file $(REPO_DIR)/scripts/boilerplate.go.txt\
+		--report-filename /dev/null\
+		k8s.io/metrics/pkg/apis/metrics/v1beta1 k8s.io/apimachinery/pkg/apis/meta/v1 k8s.io/apimachinery/pkg/api/resource k8s.io/apimachinery/pkg/version
 
 # Deprecated
 # ----------
