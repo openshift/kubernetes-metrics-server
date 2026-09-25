@@ -2,6 +2,7 @@ component: "Monitoring"
 
 reviewers:
 - simonpasquier
+- dgrisonnet
 - jan--f
 - slashpai
 - danielmellado
@@ -10,6 +11,7 @@ reviewers:
 
 approvers:
 - simonpasquier
+- dgrisonnet
 - jan--f
 - slashpai
 - danielmellado
