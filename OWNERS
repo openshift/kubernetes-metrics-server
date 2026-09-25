@@ -2,19 +2,22 @@ component: "Monitoring"
 
 reviewers:
 - simonpasquier
+- dgrisonnet
 - jan--f
 - slashpai
 - danielmellado
 - marioferh
-- rexagod
 - machine424
 
 approvers:
-- bparees
 - simonpasquier
+- dgrisonnet
 - jan--f
 - slashpai
 - danielmellado
 - marioferh
-- rexagod
 - machine424
+
+emeritus_approvers:
+- bparees
+- rexagod
