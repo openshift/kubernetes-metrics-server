@@ -6,15 +6,16 @@ reviewers:
 - slashpai
 - danielmellado
 - marioferh
-- rexagod
 - machine424
 
 approvers:
-- bparees
 - simonpasquier
 - jan--f
 - slashpai
 - danielmellado
 - marioferh
-- rexagod
 - machine424
+
+emeritus_approvers:
+- bparees
+- rexagod
