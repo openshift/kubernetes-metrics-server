@@ -33,7 +33,7 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	golang.org/x/exp v0.0.0-20230807204917-050eac23e9de // indirect
 	golang.org/x/mod v0.17.0 // indirect
-	golang.org/x/sync v0.8.0 // indirect
+	golang.org/x/sync v0.11.0 // indirect
 	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
@@ -42,3 +42,5 @@ require (
 )
 
 replace google.golang.org/grpc => github.com/openshift-sustaining/grpc-go v1.67.3-sec.1
+
+replace golang.org/x/net => github.com/openshift-sustaining/net v0.35.0-sec.4
