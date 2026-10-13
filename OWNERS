@@ -1,0 +1,23 @@
+component: "Monitoring"
+
+reviewers:
+- simonpasquier
+- jan--f
+- slashpai
+- danielmellado
+- marioferh
+- machine424
+
+approvers:
+- simonpasquier
+- jan--f
+- slashpai
+- danielmellado
+- marioferh
+- machine424
+
+emeritus_approvers:
+- bparees
+- raptorsun
+- sthaha
+- rexagod

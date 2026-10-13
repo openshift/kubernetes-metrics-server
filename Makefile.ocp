@@ -1,0 +1,4 @@
+include Makefile
+
+metrics-server-ocp: $(SRC_DEPS)
+	CGO_ENABLED=0 go build -mod=vendor -ldflags "$(LDFLAGS)" -o metrics-server sigs.k8s.io/metrics-server/cmd/metrics-server
